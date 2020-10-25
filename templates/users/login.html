@@ -9,15 +9,9 @@
 
 {% block content %}
     <div class="container lg:w-5/12 md:w-1/2 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-500">
-             
+        {% csrf_token %}     
 
-        <form method="POST" action="{% url "users:login" %}" class="w-full">
-            {% csrf_token %}
-            <input type="email" placeholder="Email Address" class="btn text-left border border-gray-600 px-5 focus:outline-none focus:border-teal-500 mb-2">
-            <input type="password" placeholder="Password" class="btn text-left border border-gray-600 px-5 focus:outline-none focus:border-teal-500 mb-2">
-        
-            <button class="text-center rounded-sm py-5 font-bold text-lg w-full bg-red-500 text-white">로 그 인</button>
-        </form>
+        {% include 'mixins/auth/auth_form.html' with form=form cta="로그인" %}
 
         {% include 'partials/social_login.html' %}
 
