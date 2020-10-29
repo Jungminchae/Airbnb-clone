@@ -5,11 +5,12 @@
     Home
 {% endblock page_title %}
 
-{% block content %}
+{% load static %}
+        <!-- <div class="rounded-xl bg-gray-800  -mx-40  h-50vh mt-32 mb-24 bg-cover bg-center" src="background-image:url({% static 'img/landscape.jpg' %});"></div> -->
 
-    <div class="container mx-auto pb-10">
-        
-        <div class="rounded-xl bg-gray-800  -mx-40  h-50vh mt-32 mb-24 bg-cover bg-center" style="background-image:url(https://images.unsplash.com/photo-1536315238512-4c8cebdaaf93?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop)"></div>
+{% block content %} 
+<div class="container mx-auto pb-10">
+        <div id="bg" class="rounded-xl"></div>      
 
         <div class="flex flex-wrap -mx-50 mb-10">
             {% for room in rooms  %}
@@ -31,8 +32,7 @@
                 </a>
             {% endif %}
 
+        </div> 
 
-        </div>
-
-    </div>
+</div>
 {% endblock content %}

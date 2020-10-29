@@ -7,14 +7,16 @@ from django.shortcuts import redirect, reverse
 from django.contrib.auth import authenticate, login, logout
 from django.core.files.base import ContentFile
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.messages.views import SuccessMessageMixin
 from . import forms, models
+from .mixins import LoggedOutOnlyView, LoggedInOnlyView, EmailLoggedInOnlyView
 
 
-class LoginView(FormView):
+class LoginView(LoggedOutOnlyView, FormView):
 
     template_name = "users/login.html"
     form_class = forms.LoginForm
-    success_url = reverse_lazy("core:home")
 
     def form_valid(self, form):
         email = form.cleaned_data.get("email")
@@ -23,6 +25,13 @@ class LoginView(FormView):
         if user is not None:
             login(self.request, user)
         return super().form_valid(form)
+
+    def get_success_url(self):
+        next_arg = self.request.GET.get("next")
+        if next_arg is not None:
+            return next_arg
+        else:
+            return reverse("core:home")
 
 
 def log_out(request):
@@ -194,13 +203,15 @@ def kakao_callback(request):
         return redirect(reverse("users:login"))
 
 
-class UserProfileView(DetailView):
+class UserProfileView(LoggedInOnlyView, DetailView):
     model = models.User
     # 매우 중요
     context_object_name = "user_obj"
 
 
-class UpdateProfileView(UpdateView):
+class UpdateProfileView(
+    LoggedInOnlyView, EmailLoggedInOnlyView, SuccessMessageMixin, UpdateView
+):
     model = models.User
     template_name = "users/update-profile.html"
     fields = (
@@ -212,6 +223,7 @@ class UpdateProfileView(UpdateView):
         "language",
         "currency",
     )
+    success_message = "프로필 업데이트 완료"
 
     def get_object(self, queryset=None):
         return self.request.user
@@ -225,8 +237,11 @@ class UpdateProfileView(UpdateView):
         return form
 
 
-class UpdatePasswordView(PasswordChangeView):
+class UpdatePasswordView(
+    LoggedInOnlyView, EmailLoggedInOnlyView, SuccessMessageMixin, PasswordChangeView
+):
     template_name = "users/update-password.html"
+    success_message = "비밀번호 업데이트 완료"
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
@@ -236,3 +251,18 @@ class UpdatePasswordView(PasswordChangeView):
             "placeholder": "Confirm new passsword"
         }
         return form
+
+    def get_success_url(self):
+        return self.request.user.get_absolute_url()
+
+
+# session / document에 session에 자세하게 나와있음
+@login_required
+def switch_hosting(request):
+    # request.session.pop("is_hosting", True)
+    try:
+        del request.session["is_hosting"]
+    except KeyError:
+        request.session["is_hosting"] = True
+    return redirect(reverse("core:home"))
+
