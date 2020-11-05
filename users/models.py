@@ -1,4 +1,6 @@
 import uuid
+
+# from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -6,6 +8,7 @@ from django.shortcuts import reverse
 from django.core.mail import send_mail
 from django.utils.html import strip_tags
 from django.template.loader import render_to_string
+from core.managers import CustomModelManager
 
 
 class User(AbstractUser):
@@ -15,6 +18,7 @@ class User(AbstractUser):
     GENDER_MALE = "male"
     GENDER_FEMALE = "female"
     GENDER_OTHER = "other"
+    # _(GENDER_MALE, "Male")
 
     GENDER_CHOICES = (
         (GENDER_MALE, "Male"),
@@ -58,6 +62,7 @@ class User(AbstractUser):
     login_method = models.CharField(
         max_length=50, choices=LOGIN_CHOICES, default=LOGIN_EMAIL
     )
+    objects = CustomModelManager()
 
     def get_absolute_url(self):
         return reverse("users:profile", kwargs={"pk": self.pk})
